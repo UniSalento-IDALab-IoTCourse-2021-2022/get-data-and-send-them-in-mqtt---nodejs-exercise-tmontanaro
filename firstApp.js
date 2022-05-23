@@ -1,5 +1,6 @@
 //const sensorLib = require('node-dht-sensor'); // include existing module called 'node-dht-sensor'
 const http = require('http')
+var mqtt=require('mqtt');
 
 // // Setup sensor, exit if failed
 // var sensorType = 11; // 11 for DHT11, 22 for DHT22 and AM2302
@@ -11,6 +12,14 @@ const http = require('http')
 //     process.exit(1);
 // }
 // initialize the request
+var client = mqtt.connect("mqtt://mqtt.eclipseprojects.io",{clientId:"mqttjs01"});
+client.on("connect",function(){
+    console.log("connected");
+});
+client.on("error",function(error){
+    console.log("Can't connect"+error);
+});
+
 
 // Automatically update sensor value every 2 seconds
 //we use a nested function (function inside another function)
@@ -25,33 +34,6 @@ setInterval(function() {
         'timestamp': 12345678,
         'temperature': 32
     })
+    client.publish("trial1/IoTLesson/raspberry1/temperature", data);
 
-    const options = {
-
-        hostname: 'localhost',
-        port: 3000,
-        path: '/temperature',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': data.length
-        }
-    }
-
-    const req = http.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`);
-
-        //define the callback function that will print the result of the request in case of success
-        res.on('data', d => {
-            process.stdout.write(d);
-        })
-
-        //define the callback function that will print the result of the request in case of error
-        req.on('error', error => {
-            console.error(error);
-        })
-    })
-    //send the request
-    req.write(data);
-    req.end();
 }, 2000);
